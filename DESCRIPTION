@@ -1,0 +1,56 @@
+Package: Z6Vx8
+Title: Utilities For Analyzing Single-nucleus RNA Sequencing Data
+Version: 0.0.0.9000
+Authors@R: 
+    person("Anna", "Luo", , "first.last@example.com", role = c("aut", "cre"))
+Description: The package contains functions I applied to analyze single-nucleus 
+    RNA sequencing data. Utilities include multi-fold clustering, computing consensus NMF 
+    components, and performing differential expression tests using pseudobulk or GLMM-based
+    methods. Utilities for processing annotated gene sets for pathway analysis, and 
+    plotting functions are also included. 
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    AnnotationDbi (>= 1.64.1),
+    BiocSingular,
+    biomaRt (>= 2.58.2),
+    bluster (>= 1.10.0),
+    clusterProfiler (>= 4.10.1),
+    DESeq2 (>= 1.40.2),
+    dplyr,
+    edgeR (>= 4.0.16),
+    ggplot2 (>= 3.5.2),
+    ggrastr (>= 1.0.2),
+    grDevices,
+    igraph (>= 1.5.0.1),
+    limma (>= 3.58.1),
+    magrittr,
+    Matrix (>= 1.6.0),
+    nebula (>= 1.5.5),
+    org.Hs.eg.db (>= 3.17.0),
+    parallel,
+    pheatmap (>= 1.0.12),
+    RANN (>= 2.6.2),
+    RColorBrewer,
+    RcppML (>= 0.5.6),
+    ReactomePA (>= 1.46.0),
+    scater (>= 1.28.0),
+    scran (>= 1.28.2),
+    Seurat (>= 4.3.0.1),
+    SingleCellExperiment (>= 1.24.0),
+    stringr,
+    tibble,
+    tidyr
+VignetteBuilder: knitr
+Depends: 
+    R (>= 3.5)
+LazyData: true
+Remotes:  
+    zdebruine/RcppML
