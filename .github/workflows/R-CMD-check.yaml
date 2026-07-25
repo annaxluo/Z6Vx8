@@ -1,3 +1,8 @@
+# Create directory
+dir.create(".github/workflows", recursive = TRUE, showWarnings = FALSE)
+
+# Write the workflow file
+writeLines('
 name: R-CMD-check
 
 on:
@@ -21,13 +26,33 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: '4.3'
+          r-version: release
           use-public-rspm: true
 
-      - name: Set up Bioconductor
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
+
+      - name: Install Bioconductor packages
         run: |
           install.packages("BiocManager")
-          BiocManager::install(version = "3.18", ask = FALSE)
+          BiocManager::install(version = "3.18", ask = FALSE, update = FALSE)
+          BiocManager::install(c(
+            "AnnotationDbi",
+            "BiocSingular",
+            "biomaRt",
+            "bluster",
+            "clusterProfiler",
+            "DESeq2",
+            "edgeR",
+            "limma",
+            "org.Hs.eg.db",
+            "ReactomePA",
+            "scater",
+            "scran",
+            "SingleCellExperiment"
+          ), ask = FALSE, update = FALSE)
         shell: Rscript {0}
 
       - name: Install RcppML from GitHub
@@ -40,7 +65,14 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-        env:
-          R_BIOC_VERSION: 3.18
 
       - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          error-on: \'"error"\'
+', ".github/workflows/R-CMD-check.yaml")
+
+# Add .github to .Rbuildignore
+usethis::use_build_ignore(".github")
+
+cat("Workflow file created at .github/workflows/R-CMD-check.yaml\n")
