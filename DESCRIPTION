@@ -52,5 +52,7 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 3.5)
 LazyData: true
-Remotes:  
+Remotes: 
     zdebruine/RcppML
+URL: https://github.com/annaxluo/Z6Vx8
+BugReports: https://github.com/annaxluo/Z6Vx8/issues
