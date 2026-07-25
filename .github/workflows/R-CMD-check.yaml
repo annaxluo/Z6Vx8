@@ -1,8 +1,3 @@
-# Create directory
-dir.create(".github/workflows", recursive = TRUE, showWarnings = FALSE)
-
-# Write the workflow file
-writeLines('
 name: R-CMD-check
 
 on:
@@ -70,9 +65,4 @@ jobs:
         with:
           upload-snapshots: true
           error-on: \'"error"\'
-', ".github/workflows/R-CMD-check.yaml")
 
-# Add .github to .Rbuildignore
-usethis::use_build_ignore(".github")
-
-cat("Workflow file created at .github/workflows/R-CMD-check.yaml\n")
