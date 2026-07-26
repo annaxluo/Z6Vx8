@@ -29,15 +29,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
 
-      - name: Install BiocManager
-        run: |
-          install.packages("BiocManager")
-        shell: Rscript {0}
-
       - name: Install Bioconductor packages
         run: |
-          BiocManager::install(version = "3.20", ask = FALSE, update = FALSE)
-          BiocManager::install(c(
+          install.packages("BiocManager")
+          BiocManager::install(version = "3.19", ask = FALSE, update = FALSE)
+          pkgs <- c(
             "AnnotationDbi",
             "BiocSingular",
             "biomaRt",
@@ -51,17 +47,20 @@ jobs:
             "scater",
             "scran",
             "SingleCellExperiment"
-          ), ask = FALSE, update = FALSE)
-        shell: Rscript {0}
-
-      - name: Install remotes
-        run: |
-          install.packages("remotes")
+          )
+          result <- BiocManager::install(pkgs, ask = FALSE, update = FALSE)
+          installed <- rownames(result$Packages_in_use)
+          missing <- setdiff(pkgs, installed)
+          if (length(missing) > 0) {
+            stop(sprintf("Failed to install: %s", paste(missing, collapse = ", ")))
+          }
+          cat("All Bioconductor packages installed successfully\n")
         shell: Rscript {0}
 
       - name: Install RcppML from GitHub
         run: |
-          remotes::install_github("zdebruine/RcppML", upgrade = "never")
+          install.packages("remotes")
+          remotes::install_github("zdebruine/RcppML")
         shell: Rscript {0}
 
       - name: Install CRAN dependencies
@@ -89,19 +88,20 @@ jobs:
           ))
         shell: Rscript {0}
 
-      - name: Verify critical package versions
+      - name: Verify critical packages are installed
         run: |
           pkgs <- c("Matrix", "nebula", "bluster", "clusterProfiler", "scater", "scran", "ReactomePA")
-          cat("Installed package versions:\n")
+          cat("Checking installed package versions:\n")
           for (pkg in pkgs) {
             if (require(pkg, character.only = TRUE)) {
               ver <- as.character(packageVersion(pkg))
               cat(sprintf("??? %s: %s\n", pkg, ver))
             } else {
               cat(sprintf("??? %s: NOT INSTALLED\n", pkg))
-              stop(sprintf("%s not installed", pkg))
+              stop(sprintf("Required package '%s' not installed", pkg))
             }
           }
+          cat("\nAll critical packages installed successfully\n")
         shell: Rscript {0}
 
       - name: Install package
@@ -113,7 +113,7 @@ jobs:
         run: |
           rcmdcheck::rcmdcheck(
             args = c("--no-manual", "--as-cran"),
-            error_on = "warning",
+            error_on = "error",
             check_dir = "check"
           )
         shell: Rscript {0}
