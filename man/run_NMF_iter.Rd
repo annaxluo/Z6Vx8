@@ -14,9 +14,11 @@ columns. Prefer \code{matrix} or \code{Matrix::dgCMatrix}. Log2 normalized count
 
 \item{nmf_model_dir}{A string. Directory to store nmf models.}
 
-\item{seed_list}{A vector of random seeds (numeric)}
+\item{seed_list}{A vector of random seeds numeric.}
 }
 \value{
+Logical. TRUE if no error.
+
 Logical. TRUE if no error.
 }
 \description{

@@ -45,6 +45,7 @@ Suggests:
     ReactomePA,
     Seurat,
     org.Hs.eg.db,
+    glmGamPoi, 
     nebula,
     cowplot,
     knitr,

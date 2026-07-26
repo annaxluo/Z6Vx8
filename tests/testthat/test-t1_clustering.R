@@ -56,6 +56,9 @@ test_that("compute_deScores handles single cluster correctly", {
 
 # test cluster_one_fold function
 test_that("cluster_one_fold returns correct output structure", {
+
+  testthat::skip_if_not_installed("Seurat")
+
   data("logcounts_mat", package = "Z6Vx8")
 
   result <- cluster_one_fold(

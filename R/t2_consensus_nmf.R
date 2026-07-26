@@ -35,47 +35,89 @@
 #' @returns Logical. TRUE if no error.
 #'
 #' @export
+#' Run NMF decomposition for multiple iterations.
+#'
+#' @param expr_mat A dense or sparse matrix of features in rows and samples in
+#' columns. Prefer `matrix` or `Matrix::dgCMatrix`. Log2 normalized counts.
+#' @param k_used An integer. Rank used.
+#' @param nmf_model_dir A string. Directory to store nmf models.
+#' @param seed_list A vector of random seeds numeric.
+#'
+#' @returns Logical. TRUE if no error.
+#'
+#' @export
 run_NMF_iter <- function(expr_mat,
                          k_used,
                          nmf_model_dir,
-                         seed_list){
+                         seed_list) {
 
-  if(!requireNamespace("RcppML", quietly = TRUE)){
-    stop("Package 'RcppML' is required.")
+  if (!requireNamespace("RcppML", quietly = TRUE)) {
+    stop("Package 'RcppML' is required.", call. = FALSE)
   }
 
-  # load full library
-  if(!"RcppML" %in% .packages()){
-    attachNamespace("RcppML")
+  if (!requireNamespace("Matrix", quietly = TRUE)) {
+    stop("Package 'Matrix' is required.", call. = FALSE)
+  }
+
+  # for CMD check
+  if (!"package:Matrix" %in% search()) {
+    suppressPackageStartupMessages(
+      library(Matrix)
+    )
   }
 
   # input validation
-  if(!is.matrix(expr_mat) && !inherits(expr_mat, "dgCMatrix")){
-    stop("expr_mat must be a matrix or dgCMatrix")
+  if (!is.matrix(expr_mat) && !inherits(expr_mat, "dgCMatrix")) {
+    stop("expr_mat must be a matrix or dgCMatrix.", call. = FALSE)
   }
 
-  for(seed_ in seed_list){
-    result <- tryCatch({
-      nmf_model <- RcppML::nmf(expr_mat,
-                               k = k_used,
-                               tol = 1e-05,
-                               maxit = 100,
-                               verbose = F,
-                               seed = seed_)
-      out_fn <- file.path(nmf_model_dir,
-                          paste0("nmf-model-iter_k", k_used, "_seed", seed_, ".rds"))
-      saveRDS(nmf_model, out_fn)
-      print(paste0("model saved to: nmf-model-iter_k", k_used, "_seed", seed_, ".rds"))
-    }, error = function(e) {
-      error_msg <- sprintf("Error for seed %d: %s", seed_, e$message)
-      print(error_msg)
-      return(FALSE)
-    })
+  if (!is.numeric(k_used) || length(k_used) != 1 || k_used < 1) {
+    stop("k_used must be a positive integer.", call. = FALSE)
   }
 
-  return(TRUE)
+  if (length(seed_list) < 1) {
+    stop("seed_list must contain at least one seed.", call. = FALSE)
+  }
+
+  dir.create(nmf_model_dir, recursive = TRUE, showWarnings = FALSE)
+
+  for (seed_ in seed_list) {
+
+    out_fn <- file.path(
+      nmf_model_dir,
+      paste0("nmf-model-iter_k", k_used, "_seed", seed_, ".rds")
+    )
+
+    nmf_model <- tryCatch(
+      {
+        RcppML::nmf(
+          expr_mat,
+          k = k_used,
+          tol = 1e-05,
+          maxit = 100,
+          verbose = FALSE,
+          seed = seed_
+        )
+      },
+      error = function(e) {
+        stop(
+          sprintf("NMF failed for seed %s: %s", seed_, conditionMessage(e)),
+          call. = FALSE
+        )
+      }
+    )
+
+    saveRDS(nmf_model, out_fn)
+
+    if (!file.exists(out_fn)) {
+      stop("NMF model was not written to file: ", out_fn, call. = FALSE)
+    }
+
+    message("model saved to: ", basename(out_fn))
+  }
+
+  TRUE
 }
-
 #' Load model weights and perform L2 normalization
 #'
 #' @param k_used An integer. Rank used.
@@ -457,17 +499,31 @@ consensus_nmf_usage <- function(expr_mat,
                                 consensus_nmf){
 
   if(!requireNamespace("RcppML", quietly = TRUE)){
-    stop("Package 'RcppML' is required.")
+    stop("Package 'RcppML' is required.", call. = FALSE)
   }
 
-  # load full library
-  if(!"RcppML" %in% .packages()){
-    attachNamespace("RcppML")
+  if(!requireNamespace("Matrix", quietly = TRUE)){
+    stop("Package 'Matrix' is required.", call. = FALSE)
+  }
+
+  # for CMD check
+  if(!"package:Matrix" %in% search()){
+    suppressPackageStartupMessages(
+      library(Matrix)
+    )
   }
 
   # input validation
   if(!is.matrix(expr_mat) && !inherits(expr_mat, "dgCMatrix")){
-    stop("expr_mat must be a matrix or dgCMatrix")
+    stop("expr_mat must be a matrix or dgCMatrix.", call. = FALSE)
+  }
+
+  if(!is.matrix(consensus_nmf) && !inherits(consensus_nmf, "dgCMatrix")){
+    stop("consensus_nmf must be a matrix or dgCMatrix.", call. = FALSE)
+  }
+
+  if(nrow(expr_mat) != nrow(consensus_nmf)){
+    stop("expr_mat and consensus_nmf must have the same number of rows.", call. = FALSE)
   }
 
   ret_h <- RcppML::project(w = consensus_nmf,

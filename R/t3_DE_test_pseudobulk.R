@@ -196,12 +196,28 @@ DE_pseudobulk <- function(sce,
     # default parameters
     if(!"DESeq2.test" %in% names(params))
       params[["DESeq2.test"]] <- "LRT"
-    if(!"DESeq2.fitType" %in% names(params))
-      params[["DESeq2.fitType"]] <- "glmGamPoi"
+
+    if(!"DESeq2.fitType" %in% names(params)){
+      params[["DESeq2.fitType"]] <- if (requireNamespace("glmGamPoi", quietly = TRUE)) {
+        "glmGamPoi"
+      } else {
+        "parametric"
+      }
+    }
+
     if(!"DESeq2.sfType" %in% names(params))
       params[["DESeq2.sfType"]] <- "ratio"
 
-    # use other params as default
+    # if glmGamPoi is requested
+    if(identical(params[["DESeq2.fitType"]], "glmGamPoi") &&
+       !requireNamespace("glmGamPoi", quietly = TRUE)){
+      stop(
+        "DESeq2.fitType = 'glmGamPoi' requires the Bioconductor package 'glmGamPoi'. ",
+        "Install it with BiocManager::install('glmGamPoi'), or use ",
+        "DESeq2.fitType = 'parametric'.",
+        call. = FALSE
+      )
+    }
 
     if(params[["DESeq2.test"]] == "LRT"){
       pb <- DESeq2::DESeq(pb,

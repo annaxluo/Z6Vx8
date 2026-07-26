@@ -120,6 +120,25 @@ test_that("DE_pseudobulk DESeq2 works with TMM normalization", {
   expect_equal(result$params$normalization_method, "TMM")
 })
 
+# 2.5. DESeq2_pseudobulk with "glmGamPoi"
+test_that("DE_pseudobulk errors clearly when glmGamPoi fitType is requested but unavailable", {
+
+  skip_if_installed("glmGamPoi")
+
+  current_valid <- get_valid_sce()
+
+  expect_error(
+    DE_pseudobulk(
+      sce = current_valid,
+      group_colname = "condition",
+      normalization_method = "RLE",
+      test_method = "DESeq2_pseudobulk",
+      DESeq2.fitType = "glmGamPoi"
+    ),
+    "requires the Bioconductor package 'glmGamPoi'"
+  )
+})
+
 # 3. test "DESeq2_pseudobulk" method with edgeR
 test_that("DE_pseudobulk works with edgeR_pseudobulk method", {
   current_valid <- get_valid_sce()
