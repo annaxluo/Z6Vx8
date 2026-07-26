@@ -11,7 +11,7 @@ Description: Functions for analyzing single-nucleus RNA sequencing data. Utiliti
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
+RoxygenNote: 7.3.1
 Suggests: 
     knitr,
     rmarkdown,
@@ -53,6 +53,7 @@ Depends:
     R (>= 3.6)
 LazyData: true
 Remotes: 
+    lhe17/nebula,
     zdebruine/RcppML
 URL: https://github.com/annaxluo/Z6Vx8
 BugReports: https://github.com/annaxluo/Z6Vx8/issues
