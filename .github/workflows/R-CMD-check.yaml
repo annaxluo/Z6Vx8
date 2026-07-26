@@ -13,6 +13,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_FORCE_SUGGESTS_: false
 
     steps:
       - uses: actions/checkout@v4
@@ -46,19 +47,21 @@ jobs:
           options(repos = c(CRAN = "https://cloud.r-project.org"))
 
           install.packages("pak")
+
           pak::pkg_install(c(
             "BiocManager",
             "remotes",
             "rcmdcheck",
             "pkgload",
             "testthat",
+            "knitr",
+            "rmarkdown",
             "bslib",
             "shiny",
             "htmlwidgets",
             "miniUI",
-            "knitr",
-            "rmarkdown",
             "dplyr",
+            "ggplot2",
             "ggrastr",
             "igraph",
             "magrittr",
@@ -66,19 +69,17 @@ jobs:
             "pheatmap",
             "RANN",
             "RColorBrewer",
+            "RcppML",
             "stringr",
             "tibble",
             "tidyr",
             "cowplot"
           ))
 
-          BiocManager::install(version = "3.20", ask = FALSE, update = FALSE)
-
-          remotes::install_version(
-            "ggplot2",
-            version = "3.5.1",
-            repos = "https://cloud.r-project.org",
-            upgrade = "never"
+          BiocManager::install(
+            version = "3.20",
+            ask = FALSE,
+            update = FALSE
           )
 
           bioc_pkgs <- c(
@@ -99,8 +100,6 @@ jobs:
             ask = FALSE,
             update = FALSE
           )
-
-          remotes::install_github("zdebruine/RcppML", upgrade = "never")
 
           required_pkgs <- c(
             bioc_pkgs,
@@ -131,7 +130,7 @@ jobs:
 
           if (length(missing) > 0) {
             stop(sprintf(
-              "Failed to install/load: %s",
+              "Failed to install/load required packages: %s",
               paste(missing, collapse = ", ")
             ))
           }
@@ -150,6 +149,8 @@ jobs:
 
       - name: R CMD check
         run: |
+          Sys.setenv("_R_CHECK_FORCE_SUGGESTS_" = "false")
+
           rcmdcheck::rcmdcheck(
             args = c("--no-manual", "--as-cran"),
             error_on = "error",
