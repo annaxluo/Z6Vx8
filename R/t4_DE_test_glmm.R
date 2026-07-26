@@ -88,6 +88,7 @@ DE_glmm <- function(sce,
                     normalization_method = c("RLE", "TMM", "colSums"),
                     test_method=c("NBGMM", "NBLMM-reml", "PMM"),
                     ...){
+
   params <- list(...)
 
   # check argument validity
@@ -102,6 +103,14 @@ DE_glmm <- function(sce,
 
   if(!args_check){
     stop("invalid inputs.")
+  }
+
+  if(!requireNamespace("nebula", quietly = TRUE)){
+    stop(
+      "Package 'nebula' is required for DE_glmm(). ",
+      "Install it with remotes::install_github('lhe17/nebula').",
+      call. = FALSE
+    )
   }
 
   params[["normalization_method"]] <- normalization_method

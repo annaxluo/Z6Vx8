@@ -1,5 +1,10 @@
 # test pathway analysis functions
 
+# skip if not installed
+testthat::skip_if_not_installed("clusterProfiler")
+testthat::skip_if_not_installed("ReactomePA")
+testthat::skip_if_not_installed("org.Hs.eg.db")
+
 # Test GO pathway processing
 # 1. GO_BP pathways
 test_that("process_pathway processes GO_BP pathways and returns TRUE", {

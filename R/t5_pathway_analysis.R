@@ -29,6 +29,15 @@ process_pathway <- function(pathway_output_path,
 
   # GO terms
   if(pathway_str %in% c("GO_BP", "GO_CC", "GO_MF")){
+
+    if(!requireNamespace("clusterProfiler", quietly = TRUE)){
+      stop(
+        "Package 'clusterProfiler' is required for process_pathway(). ",
+        "Install it with BiocManager::install('clusterProfiler').",
+        call. = FALSE
+      )
+    }
+
     env_ <- clusterProfiler:::get_GO_data('org.Mm.eg.db',
                                           ont=stringr::str_split_i(pathway_str, "_", 2),
                                           keytype="ENSEMBL")
@@ -37,12 +46,29 @@ process_pathway <- function(pathway_output_path,
 
   # Reactome
   if(pathway_str == "Reactome"){
+    if(!requireNamespace("ReactomePA", quietly = TRUE)){
+      stop(
+        "Package 'ReactomePA' is required for process_pathway(). ",
+        "Install it with BiocManager::install('ReactomePA').",
+        call. = FALSE
+      )
+    }
+
     env_ <- ReactomePA:::get_Reactome_DATA("mouse")
     type_ <- "Reactome"
   }
 
   # KEGG
   if(pathway_str == "KEGG"){
+
+    if(!requireNamespace("clusterProfiler", quietly = TRUE)){
+      stop(
+        "Package 'clusterProfiler' is required for process_pathway(). ",
+        "Install it with BiocManager::install('clusterProfiler').",
+        call. = FALSE
+      )
+    }
+
     species <- clusterProfiler:::organismMapper("mouse") # "mmu"
     env_ <- clusterProfiler:::prepare_KEGG(species)
     type_ <- "KEGG"
@@ -169,6 +195,14 @@ extract_SynGO_pathways <- function(syngo_path, ensembl_version="110"){
 map_human_gene_to_mouse_gene_symbol <- function(gene_list,
                                                 input_type=c("ensembl_id","entrez_id","gene_symbol"),
                                                 ensembl_version="110"){
+
+  if(!requireNamespace("org.Hs.eg.db", quietly = TRUE)){
+    stop(
+      "Package 'org.Hs.eg.db' is required when OrgDb is not supplied. ",
+      "Install it with BiocManager::install('org.Hs.eg.db').",
+      call. = FALSE
+    )
+  }
 
   # convert input to ensembl IDs
   if(input_type == "ensembl_id"){

@@ -11,7 +11,6 @@ Description: Functions for analyzing single-nucleus RNA sequencing data. Utiliti
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
 Depends: 
     R (>= 4.4.0),
     R (< 4.5.0)
@@ -20,7 +19,6 @@ Imports:
     BiocSingular,
     biomaRt,
     bluster,
-    clusterProfiler,
     DESeq2,
     dplyr,
     edgeR,
@@ -31,22 +29,23 @@ Imports:
     limma,
     magrittr,
     Matrix,
-    nebula,
-    org.Hs.eg.db,
     parallel,
     pheatmap,
     RANN,
     RColorBrewer,
     RcppML,
-    ReactomePA,
     scater,
     scran,
-    Seurat,
     SingleCellExperiment,
     stringr,
     tibble,
     tidyr
 Suggests: 
+    clusterProfiler,
+    ReactomePA,
+    Seurat,
+    org.Hs.eg.db,
+    nebula,
     cowplot,
     knitr,
     rmarkdown,
@@ -59,3 +58,4 @@ Remotes:
     zdebruine/RcppML
 URL: https://github.com/annaxluo/Z6Vx8
 BugReports: https://github.com/annaxluo/Z6Vx8/issues
+Config/roxygen2/version: 8.0.0

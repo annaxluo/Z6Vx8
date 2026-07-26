@@ -45,12 +45,35 @@ jobs:
         run: |
           options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-          install.packages(c("BiocManager", "remotes", "rcmdcheck"))
+          install.packages("pak")
+          pak::pkg_install(c(
+            "BiocManager",
+            "remotes",
+            "rcmdcheck",
+            "pkgload",
+            "testthat",
+            "bslib",
+            "shiny",
+            "htmlwidgets",
+            "miniUI",
+            "knitr",
+            "rmarkdown",
+            "dplyr",
+            "ggrastr",
+            "igraph",
+            "magrittr",
+            "Matrix",
+            "pheatmap",
+            "RANN",
+            "RColorBrewer",
+            "stringr",
+            "tibble",
+            "tidyr",
+            "cowplot"
+          ))
 
-          # Match R 4.4.x with Bioconductor 3.20.
           BiocManager::install(version = "3.20", ask = FALSE, update = FALSE)
 
-          # Pin ggplot2 to avoid the Bioconductor 3.20 ggtree/check_linewidth issue.
           remotes::install_version(
             "ggplot2",
             version = "3.5.1",
@@ -63,12 +86,9 @@ jobs:
             "BiocSingular",
             "biomaRt",
             "bluster",
-            "clusterProfiler",
             "DESeq2",
             "edgeR",
             "limma",
-            "org.Hs.eg.db",
-            "ReactomePA",
             "scater",
             "scran",
             "SingleCellExperiment"
@@ -80,8 +100,12 @@ jobs:
             update = FALSE
           )
 
-          cran_pkgs <- c(
+          remotes::install_github("zdebruine/RcppML", upgrade = "never")
+
+          required_pkgs <- c(
+            bioc_pkgs,
             "dplyr",
+            "ggplot2",
             "ggrastr",
             "igraph",
             "magrittr",
@@ -89,27 +113,15 @@ jobs:
             "pheatmap",
             "RANN",
             "RColorBrewer",
-            "Seurat",
+            "RcppML",
             "stringr",
             "tibble",
             "tidyr",
             "cowplot",
+            "pkgload",
             "testthat",
             "knitr",
-            "rmarkdown"
-          )
-
-          install.packages(cran_pkgs)
-
-          remotes::install_github("lhe17/nebula", upgrade = "never")
-          remotes::install_github("zdebruine/RcppML", upgrade = "never")
-
-          required_pkgs <- c(
-            bioc_pkgs,
-            cran_pkgs,
-            "ggplot2",
-            "nebula",
-            "RcppML",
+            "rmarkdown",
             "rcmdcheck"
           )
 
@@ -124,7 +136,7 @@ jobs:
             ))
           }
 
-          cat("All required packages installed successfully\n")
+          cat("All required non-optional packages installed successfully\n")
         shell: Rscript {0}
 
       - name: Install package

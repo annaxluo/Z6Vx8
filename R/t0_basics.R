@@ -29,6 +29,14 @@ compute_hvg <- function(expr_mat,
                         fdr_top_cutoff=.5,
                         n_top_genes=3000){
 
+  if(!requireNamespace("Seurat", quietly = TRUE)){
+    stop(
+      "Package 'Seurat' is required for compute_hvg(). ",
+      "Install it with install.packages('Seurat').",
+      call. = FALSE
+    )
+  }
+
   dat <- expr_mat[,used_cells]
 
   # Fit loess regression

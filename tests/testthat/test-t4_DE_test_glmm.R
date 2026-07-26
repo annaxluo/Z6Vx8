@@ -1,8 +1,13 @@
 # test functions for GLMM-based differential expression tests
 
+# skip if "nebula" is not installed.
+
+testthat::skip_if_not_installed("nebula")
+
 # test invalid inputs to DE_glmm -------------------------------------------
 # 1. group_colname does not exist in colData
 test_that("DE_glmm errors when group_colname not in colData", {
+
   data("sce", package = "Z6Vx8")
 
   expect_error(
@@ -19,6 +24,7 @@ test_that("DE_glmm errors when group_colname not in colData", {
 
 # 2. random_var_colname does not exist in colData
 test_that("DE_glmm errors when random_var_colname not in colData", {
+
   data("sce", package = "Z6Vx8")
 
   expect_error(
