@@ -21,7 +21,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: '4.3.0'
+          r-version: '4.4.0'
           use-public-rspm: true
 
       - name: Install system dependencies
@@ -36,7 +36,7 @@ jobs:
 
       - name: Install Bioconductor packages
         run: |
-          BiocManager::install(version = "3.17", ask = FALSE, update = FALSE)
+          BiocManager::install(version = "3.18", ask = FALSE, update = FALSE)
           BiocManager::install(c(
             "AnnotationDbi",
             "BiocSingular",
@@ -64,17 +64,7 @@ jobs:
           remotes::install_github("zdebruine/RcppML", upgrade = "never")
         shell: Rscript {0}
 
-      - name: Install Matrix from archive
-        run: |
-          remotes::install_version("Matrix", version = "1.6-0", upgrade = "never", repos = "https://cloud.r-project.org")
-        shell: Rscript {0}
-
-      - name: Install nebula 1.5.5 from GitHub
-        run: |
-          remotes::install_github("lhe17/nebula@v1.5.5", upgrade = "never")
-        shell: Rscript {0}
-
-      - name: Install other CRAN dependencies
+      - name: Install CRAN dependencies
         run: |
           install.packages(c(
             "dplyr",
@@ -82,6 +72,8 @@ jobs:
             "ggrastr",
             "igraph",
             "magrittr",
+            "Matrix",
+            "nebula",
             "pheatmap",
             "RANN",
             "RColorBrewer",
@@ -94,33 +86,17 @@ jobs:
             "knitr",
             "rmarkdown",
             "rcmdcheck"
-          ), dependencies = NA)
+          ))
         shell: Rscript {0}
 
       - name: Verify critical package versions
         run: |
-          required_pkgs <- list(
-            Matrix = "1.6-0",
-            nebula = "1.5.5",
-            bluster = NULL,
-            clusterProfiler = NULL,
-            scater = NULL,
-            scran = NULL,
-            ReactomePA = NULL
-          )
-
-          for (pkg in names(required_pkgs)) {
+          pkgs <- c("Matrix", "nebula", "bluster", "clusterProfiler", "scater", "scran", "ReactomePA")
+          cat("Installed package versions:\n")
+          for (pkg in pkgs) {
             if (require(pkg, character.only = TRUE)) {
               ver <- as.character(packageVersion(pkg))
-              if (!is.null(required_pkgs[[pkg]])) {
-                if (ver == required_pkgs[[pkg]]) {
-                  cat(sprintf("??? %s: %s (required)\n", pkg, ver))
-                } else {
-                  cat(sprintf("??? %s: %s (expected: %s)\n", pkg, ver, required_pkgs[[pkg]]))
-                }
-              } else {
-                cat(sprintf("??? %s: %s\n", pkg, ver))
-              }
+              cat(sprintf("??? %s: %s\n", pkg, ver))
             } else {
               cat(sprintf("??? %s: NOT INSTALLED\n", pkg))
               stop(sprintf("%s not installed", pkg))
@@ -130,7 +106,7 @@ jobs:
 
       - name: Install package
         run: |
-          remotes::install_local(".", dependencies = FALSE, upgrade = "never")
+          remotes::install_local(".", dependencies = FALSE)
         shell: Rscript {0}
 
       - name: R CMD check
