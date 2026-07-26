@@ -32,7 +32,7 @@ jobs:
       - name: Install Bioconductor packages
         run: |
           install.packages("BiocManager")
-          BiocManager::install(version = "3.19", ask = FALSE, update = FALSE)
+          BiocManager::install(version = "3.20", ask = FALSE, update = FALSE)
           pkgs <- c(
             "AnnotationDbi",
             "BiocSingular",
@@ -95,9 +95,9 @@ jobs:
           for (pkg in pkgs) {
             if (require(pkg, character.only = TRUE)) {
               ver <- as.character(packageVersion(pkg))
-              cat(sprintf("??? %s: %s\n", pkg, ver))
+              cat(sprintf("OK: %s: %s\n", pkg, ver))
             } else {
-              cat(sprintf("??? %s: NOT INSTALLED\n", pkg))
+              cat(sprintf("INVALID: %s: NOT INSTALLED\n", pkg))
               stop(sprintf("Required package '%s' not installed", pkg))
             }
           }

@@ -3,56 +3,57 @@ Title: Utilities for Analyzing Single-Nucleus RNA Sequencing Data
 Version: 0.0.0.9000
 Authors@R: 
     person("Anna", "Luo", , "first.last@example.com", role = c("aut", "cre"))
-Description: Functions for analyzing single-nucleus RNA sequencing data. 
-    Utilities include multi-fold clustering, computing consensus NMF 
-    components, and performing differential expression tests using pseudobulk 
-    or GLMM-based methods. Utilities for processing annotated gene sets for 
-    pathway analysis, and plotting functions are also included.
+Description: Functions for analyzing single-nucleus RNA sequencing data. Utilities 
+    include multi-fold clustering, computing consensus NMF components, and performing 
+    differential expression tests using pseudobulk or GLMM-based methods. Utilities 
+    for processing annotated gene sets for pathway analysis, and plotting functions 
+    are also included.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
+RoxygenNote: 7.3.1
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
-    AnnotationDbi,
+    AnnotationDbi (>= 1.64.1),
     BiocSingular,
-    biomaRt,
-    bluster,
-    clusterProfiler,
-    DESeq2,
+    biomaRt (>= 2.58.2),
+    bluster (>= 1.10.0),
+    clusterProfiler (>= 4.10.1),
+    DESeq2 (>= 1.40.2),
     dplyr,
-    edgeR,
-    ggplot2,
-    ggrastr,
+    edgeR (>= 4.0.16),
+    ggplot2 (>= 3.5.0),
+    ggrastr (>= 1.0.0),
     grDevices,
-    igraph,
-    limma,
+    igraph (>= 1.5.0),
+    limma (>= 3.58.0),
     magrittr,
-    Matrix,
-    nebula,
-    org.Hs.eg.db,
+    Matrix (>= 1.6.0),
+    nebula (>= 1.5.5),
+    org.Hs.eg.db (>= 3.17.0),
     parallel,
-    pheatmap,
-    RANN,
+    pheatmap (>= 1.0.12),
+    RANN (>= 2.6.0),
     RColorBrewer,
-    RcppML,
-    ReactomePA,
-    scater,
-    scran,
-    Seurat,
-    SingleCellExperiment,
+    RcppML (>= 0.5.6),
+    ReactomePA (>= 1.46.0),
+    scater (>= 1.28.0),
+    scran (>= 1.28.0),
+    Seurat (>= 4.3.0),
+    SingleCellExperiment (>= 1.24.0),
     stringr,
     tibble,
     tidyr
 VignetteBuilder: knitr
 Depends: 
-    R (>= 4.4)
+    R (>= 4.4.0), R (< 4.5.0)
 LazyData: true
 Remotes: 
+    lhe17/nebula,
     zdebruine/RcppML
 URL: https://github.com/annaxluo/Z6Vx8
 BugReports: https://github.com/annaxluo/Z6Vx8/issues
