@@ -29,10 +29,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
 
-      - name: Install Bioconductor packages
+      - name: Install BiocManager
         run: |
           install.packages("BiocManager")
-          BiocManager::install(version = "3.18", ask = FALSE, update = FALSE)
+        shell: Rscript {0}
+
+      - name: Install Bioconductor packages
+        run: |
+          BiocManager::install(version = "3.17", ask = FALSE, update = FALSE)
           BiocManager::install(c(
             "AnnotationDbi",
             "BiocSingular",
@@ -50,13 +54,23 @@ jobs:
           ), ask = FALSE, update = FALSE)
         shell: Rscript {0}
 
-      - name: Install RcppML from GitHub
+      - name: Install remotes and pak
         run: |
-          install.packages("remotes")
-          remotes::install_github("zdebruine/RcppML")
+          install.packages(c("remotes", "pak"))
         shell: Rscript {0}
 
-      - name: Install CRAN dependencies
+      - name: Install RcppML from GitHub
+        run: |
+          remotes::install_github("zdebruine/RcppML", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Install specific versions of Matrix and nebula
+        run: |
+          remotes::install_version("Matrix", version = "1.6-0", upgrade = "never")
+          remotes::install_version("nebula", version = "1.5.5", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Install other CRAN dependencies
         run: |
           install.packages(c(
             "dplyr",
@@ -64,8 +78,6 @@ jobs:
             "ggrastr",
             "igraph",
             "magrittr",
-            "Matrix",
-            "nebula",
             "pheatmap",
             "RANN",
             "RColorBrewer",
@@ -78,19 +90,51 @@ jobs:
             "knitr",
             "rmarkdown",
             "rcmdcheck"
-          ))
+          ), dependencies = NA)
+        shell: Rscript {0}
+
+      - name: Verify critical package versions
+        run: |
+          required_pkgs <- list(
+            Matrix = "1.6-0",
+            nebula = "1.5.5",
+            bluster = NULL,
+            clusterProfiler = NULL,
+            scater = NULL,
+            scran = NULL,
+            ReactomePA = NULL
+          )
+
+          for (pkg in names(required_pkgs)) {
+            if (require(pkg, character.only = TRUE)) {
+              ver <- as.character(packageVersion(pkg))
+              if (!is.null(required_pkgs[[pkg]])) {
+                if (ver == required_pkgs[[pkg]]) {
+                  cat(sprintf("OK: %s: %s (required)\n", pkg, ver))
+                } else {
+                  cat(sprintf("Invalid: %s: %s (required: %s)\n", pkg, ver, required_pkgs[[pkg]]))
+                  stop(sprintf("Version mismatch for %s", pkg))
+                }
+              } else {
+                cat(sprintf("OK: %s: %s\n", pkg, ver))
+              }
+            } else {
+              cat(sprintf("Invalid: %s: NOT INSTALLED\n", pkg))
+              stop(sprintf("%s not installed", pkg))
+            }
+          }
         shell: Rscript {0}
 
       - name: Install package
         run: |
-          remotes::install_local(".", dependencies = FALSE)
+          remotes::install_local(".", dependencies = FALSE, upgrade = "never")
         shell: Rscript {0}
 
       - name: R CMD check
         run: |
           rcmdcheck::rcmdcheck(
             args = c("--no-manual", "--as-cran"),
-            error_on = "error",
+            error_on = "warning",
             check_dir = "check"
           )
         shell: Rscript {0}
