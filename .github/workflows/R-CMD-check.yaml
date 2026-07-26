@@ -27,13 +27,38 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            libxml2-dev \
+            libharfbuzz-dev \
+            libfribidi-dev \
+            libglpk-dev \
+            libfontconfig1-dev \
+            libcairo2-dev \
+            libfreetype6-dev \
+            libpng-dev \
+            libtiff5-dev \
+            libjpeg-dev
 
-      - name: Install Bioconductor packages
+      - name: Install R dependencies
         run: |
-          install.packages("BiocManager")
+          options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+          install.packages(c("BiocManager", "remotes", "rcmdcheck"))
+
+          # Match R 4.4.x with Bioconductor 3.20.
           BiocManager::install(version = "3.20", ask = FALSE, update = FALSE)
-          pkgs <- c(
+
+          # Pin ggplot2 to avoid the Bioconductor 3.20 ggtree/check_linewidth issue.
+          remotes::install_version(
+            "ggplot2",
+            version = "3.5.1",
+            repos = "https://cloud.r-project.org",
+            upgrade = "never"
+          )
+
+          bioc_pkgs <- c(
             "AnnotationDbi",
             "BiocSingular",
             "biomaRt",
@@ -48,31 +73,19 @@ jobs:
             "scran",
             "SingleCellExperiment"
           )
-          result <- BiocManager::install(pkgs, ask = FALSE, update = FALSE)
-          installed <- rownames(result$Packages_in_use)
-          missing <- setdiff(pkgs, installed)
-          if (length(missing) > 0) {
-            stop(sprintf("Failed to install: %s", paste(missing, collapse = ", ")))
-          }
-          cat("All Bioconductor packages installed successfully\n")
-        shell: Rscript {0}
 
-      - name: Install RcppML from GitHub
-        run: |
-          install.packages("remotes")
-          remotes::install_github("zdebruine/RcppML")
-        shell: Rscript {0}
+          BiocManager::install(
+            bioc_pkgs,
+            ask = FALSE,
+            update = FALSE
+          )
 
-      - name: Install CRAN dependencies
-        run: |
-          install.packages(c(
+          cran_pkgs <- c(
             "dplyr",
-            "ggplot2",
             "ggrastr",
             "igraph",
             "magrittr",
             "Matrix",
-            "nebula",
             "pheatmap",
             "RANN",
             "RColorBrewer",
@@ -83,30 +96,44 @@ jobs:
             "cowplot",
             "testthat",
             "knitr",
-            "rmarkdown",
-            "rcmdcheck"
-          ))
-        shell: Rscript {0}
+            "rmarkdown"
+          )
 
-      - name: Verify critical packages are installed
-        run: |
-          pkgs <- c("Matrix", "nebula", "bluster", "clusterProfiler", "scater", "scran", "ReactomePA")
-          cat("Checking installed package versions:\n")
-          for (pkg in pkgs) {
-            if (require(pkg, character.only = TRUE)) {
-              ver <- as.character(packageVersion(pkg))
-              cat(sprintf("OK: %s: %s\n", pkg, ver))
-            } else {
-              cat(sprintf("INVALID: %s: NOT INSTALLED\n", pkg))
-              stop(sprintf("Required package '%s' not installed", pkg))
-            }
+          install.packages(cran_pkgs)
+
+          remotes::install_github("lhe17/nebula", upgrade = "never")
+          remotes::install_github("zdebruine/RcppML", upgrade = "never")
+
+          required_pkgs <- c(
+            bioc_pkgs,
+            cran_pkgs,
+            "ggplot2",
+            "nebula",
+            "RcppML",
+            "rcmdcheck"
+          )
+
+          missing <- required_pkgs[
+            !vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)
+          ]
+
+          if (length(missing) > 0) {
+            stop(sprintf(
+              "Failed to install/load: %s",
+              paste(missing, collapse = ", ")
+            ))
           }
-          cat("\nAll critical packages installed successfully\n")
+
+          cat("All required packages installed successfully\n")
         shell: Rscript {0}
 
       - name: Install package
         run: |
-          remotes::install_local(".", dependencies = FALSE)
+          remotes::install_local(
+            ".",
+            dependencies = FALSE,
+            upgrade = "never"
+          )
         shell: Rscript {0}
 
       - name: R CMD check
