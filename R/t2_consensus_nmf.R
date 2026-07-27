@@ -30,17 +30,6 @@
 #' columns. Prefer `matrix` or `Matrix::dgCMatrix`. Log2 normalized counts.
 #' @param k_used An integer. Rank used.
 #' @param nmf_model_dir A string. Directory to store nmf models.
-#' @param seed_list A vector of random seeds (numeric)
-#'
-#' @returns Logical. TRUE if no error.
-#'
-#' @export
-#' Run NMF decomposition for multiple iterations.
-#'
-#' @param expr_mat A dense or sparse matrix of features in rows and samples in
-#' columns. Prefer `matrix` or `Matrix::dgCMatrix`. Log2 normalized counts.
-#' @param k_used An integer. Rank used.
-#' @param nmf_model_dir A string. Directory to store nmf models.
 #' @param seed_list A vector of random seeds numeric.
 #'
 #' @returns Logical. TRUE if no error.
@@ -118,6 +107,7 @@ run_NMF_iter <- function(expr_mat,
 
   TRUE
 }
+
 #' Load model weights and perform L2 normalization
 #'
 #' @param k_used An integer. Rank used.

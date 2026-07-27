@@ -18,8 +18,6 @@ columns. Prefer \code{matrix} or \code{Matrix::dgCMatrix}. Log2 normalized count
 }
 \value{
 Logical. TRUE if no error.
-
-Logical. TRUE if no error.
 }
 \description{
 Run NMF decomposition for multiple iterations.
