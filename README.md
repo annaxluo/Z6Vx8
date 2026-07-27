@@ -25,7 +25,7 @@ The package uses several Bioconductor packages. Some dependencies are required f
 ### 1. Install Bioconductor
 
 ```r
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
+if(!requireNamespace("BiocManager", quietly = TRUE)){
   install.packages("BiocManager")
 }
 
@@ -72,9 +72,11 @@ install.packages(c(
 Z6Vx8 uses `RcppML` for NMF decomposition. The developer versions '0.5.6' and '0.5.8' have been tested. 
 
 ```r
-install.packages("remotes")
+if(!requireNamespace("devtools", quietly = TRUE)){
+  install.packages("devtools")
+}
 
-remotes::install_github("zdebruine/RcppML")
+devtools::install_github("zdebruine/RcppML")
 ```
 
 ### 4. Install optional dependencies for specific functions
@@ -114,7 +116,7 @@ GLMM-based differential expression function `DE_glmm` require:
 - `nebula`
 
 ```r
-BiocManager::install("nebula")
+devtools::install_github("lhe17/nebula")
 ```
 
 Install this before running GLMM-based differential expression tests.
@@ -138,7 +140,7 @@ install.packages("cowplot")
 ### 5. Install Z6Vx8
 
 ```r
-remotes::install_github("annaxluo/Z6Vx8")
+devtools::install_github("annaxluo/Z6Vx8")
 ```
 
 ## Requirements

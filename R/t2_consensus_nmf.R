@@ -6,7 +6,7 @@
 # b. Computing consensus NMF as one closest to the cluster centroid to preserve
 #    sparseness of components.
 # c. Removing cNMFs that capture mainly random effects (samples, batches, etc.)
-#    based on Z test.
+#    based on Wilcoxon tests.
 #
 # Using "RcppML".
 #
@@ -22,7 +22,7 @@
 #    on silhouette and cluster size)
 # 9. Compute consensus NMF components: median, or prototypic component
 # 10. Compute usage of consensus NMFs.
-# 11. Filter cNMFs that capture mainly random effects based on Z tests.
+# 11. Filter cNMFs that capture mainly random effects based on Wilcoxon tests.
 
 # helper functions --------------------------------
 #' Access fields from RcppML NMF models across RcppML versions
