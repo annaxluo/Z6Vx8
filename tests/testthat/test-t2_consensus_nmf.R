@@ -35,9 +35,11 @@ test_that("run_NMF_iter runs NMF decomposition for multiple iterations", {
 
   # load one model
   model <- readRDS(expected_files[1])
-  expect_s4_class(model, "nmf")
-  expect_equal(ncol(model@w), k_used)
-  expect_equal(nrow(model@w), nrow(logcounts_mat))
+  model_w <- .get_RcppML_model_field(model, "w")
+
+  expect_true(is.matrix(model_w) || inherits(model_w, "Matrix"))
+  expect_equal(ncol(model_w), k_used)
+  expect_equal(nrow(model_w), nrow(logcounts_mat))
 })
 
 

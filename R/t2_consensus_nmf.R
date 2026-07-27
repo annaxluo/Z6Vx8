@@ -24,6 +24,42 @@
 # 10. Compute usage of consensus NMFs.
 # 11. Filter cNMFs that capture mainly random effects based on Z tests.
 
+# helper functions
+#' Access fields from RcppML NMF models across RcppML versions
+#'
+#' RcppML models may be returned either as an S4 object with slots `@w`, `@h`,
+#' and `@d`, or as a list-like object with fields `$w`, `$h`, and `$d`.
+#'
+#' @param model An RcppML NMF model object.
+#' @param field Character scalar. One of `"w"`, `"h"`, or `"d"`.
+#'
+#' @returns The requested model field.
+#'
+#' @keywords internal
+.get_RcppML_model_field <- function(model, field = c("w", "h", "d")) {
+
+  field <- match.arg(field)
+
+  # newer RcppML development versions: list-like model
+  if (is.list(model) && field %in% names(model)) {
+    return(model[[field]])
+  }
+
+  # older RcppML versions: S4 object with slots
+  if (methods::is(model, "S4") && field %in% methods::slotNames(model)) {
+    return(methods::slot(model, field))
+  }
+
+  stop(
+    sprintf(
+      "Could not access field '%s' from RcppML model. Expected either model$%s or model@%s.",
+      field, field, field
+    ),
+    call. = FALSE
+  )
+}
+
+
 #' Run NMF decomposition for multiple iterations.
 #'
 #' @param expr_mat A dense or sparse matrix of features in rows and samples in
@@ -124,7 +160,8 @@ load_model_weights <- function(k_used,
   nmf_w_list <- do.call("cbind", lapply(seed_list, function(seed_){
     nmf_model <- readRDS(file.path(nmf_model_dir,
                                    paste0("nmf-model-iter_k", k_used, "_seed", seed_, ".rds")))
-    nmf_w <- nmf_model@w
+
+    nmf_w <- .get_RcppML_model_field(nmf_model, "w")
 
     # L2 normalization
     nmf_w_norm <- nmf_w %*% diag(1 / sqrt(colSums(nmf_w^2)))
