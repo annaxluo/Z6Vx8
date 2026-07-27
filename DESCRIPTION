@@ -38,6 +38,7 @@ Imports:
     scran,
     SingleCellExperiment,
     stringr,
+    SummarizedExperiment,
     tibble,
     tidyr
 Suggests: 

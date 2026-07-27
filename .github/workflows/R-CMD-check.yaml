@@ -92,7 +92,8 @@ jobs:
             "limma",
             "scater",
             "scran",
-            "SingleCellExperiment"
+            "SingleCellExperiment",
+            "SummarizedExperiment"
           )
 
           BiocManager::install(

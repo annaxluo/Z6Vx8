@@ -123,7 +123,10 @@ test_that("DE_pseudobulk DESeq2 works with TMM normalization", {
 # 2.5. DESeq2_pseudobulk with "glmGamPoi"
 test_that("DE_pseudobulk errors clearly when glmGamPoi fitType is requested but unavailable", {
 
-  skip_if_installed("glmGamPoi")
+  testthat::skip_if(
+    requireNamespace("glmGamPoi", quietly = TRUE),
+    "glmGamPoi is installed; this test only applies when glmGamPoi is unavailable."
+  )
 
   current_valid <- get_valid_sce()
 

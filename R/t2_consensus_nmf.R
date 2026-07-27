@@ -24,7 +24,7 @@
 # 10. Compute usage of consensus NMFs.
 # 11. Filter cNMFs that capture mainly random effects based on Z tests.
 
-# helper functions
+# helper functions --------------------------------
 #' Access fields from RcppML NMF models across RcppML versions
 #'
 #' RcppML models may be returned either as an S4 object with slots `@w`, `@h`,
@@ -36,17 +36,17 @@
 #' @returns The requested model field.
 #'
 #' @keywords internal
-.get_RcppML_model_field <- function(model, field = c("w", "h", "d")) {
+.get_RcppML_model_field <- function(model, field = c("w", "h", "d")){
 
   field <- match.arg(field)
 
   # newer RcppML development versions: list-like model
-  if (is.list(model) && field %in% names(model)) {
+  if(is.list(model) && field %in% names(model)){
     return(model[[field]])
   }
 
-  # older RcppML versions: S4 object with slots
-  if (methods::is(model, "S4") && field %in% methods::slotNames(model)) {
+  # older RcppML versions: "nmf" object with slots
+  if(methods::is(model, "nmf") && field %in% methods::slotNames(model)){
     return(methods::slot(model, field))
   }
 
@@ -55,6 +55,64 @@
       "Could not access field '%s' from RcppML model. Expected either model$%s or model@%s.",
       field, field, field
     ),
+    call. = FALSE
+  )
+}
+
+#' Call RcppML::project across RcppML versions.
+#'
+#' Older RcppML versions used argument `data`; newer versions use argument `A`.
+#'
+#' @param w NMF weight matrix.
+#' @param A Input matrix.
+#'
+#' @returns Projected usage/loadings matrix.
+#'
+#' @keywords internal
+.rcppml_project <- function(w, A){
+
+  project_formals <- names(formals(RcppML::project))
+
+  if ("A" %in% project_formals) {
+    return(RcppML::project(w = w, A = A))
+  }
+
+  if ("data" %in% project_formals) {
+    return(RcppML::project(w = w, data = A))
+  }
+
+  stop(
+    "Unsupported RcppML::project() API. Expected argument `A` or `data`.",
+    call. = FALSE
+  )
+}
+
+#' Call RcppML::mse across RcppML versions
+#'
+#' Older RcppML versions used argument `data`; newer versions use argument `A`.
+#'
+#' @param w NMF weight matrix.
+#' @param d NMF diagonal/scaling vector.
+#' @param h NMF usage/loadings matrix.
+#' @param A Input matrix.
+#'
+#' @returns Mean squared error.
+#'
+#' @keywords internal
+.rcppml_mse <- function(w, d, h, A){
+
+  mse_formals <- names(formals(RcppML::mse))
+
+  if("A" %in% mse_formals){
+    return(RcppML::mse(w = w, d = d, h = h, A = A))
+  }
+
+  if("data" %in% mse_formals){
+    return(RcppML::mse(w = w, d = d, h = h, data = A))
+  }
+
+  stop(
+    "Unsupported RcppML::mse() API. Expected argument `A` or `data`.",
     call. = FALSE
   )
 }
@@ -76,11 +134,11 @@ run_NMF_iter <- function(expr_mat,
                          nmf_model_dir,
                          seed_list) {
 
-  if (!requireNamespace("RcppML", quietly = TRUE)) {
+  if(!requireNamespace("RcppML", quietly = TRUE)){
     stop("Package 'RcppML' is required.", call. = FALSE)
   }
 
-  if (!requireNamespace("Matrix", quietly = TRUE)) {
+  if(!requireNamespace("Matrix", quietly = TRUE)){
     stop("Package 'Matrix' is required.", call. = FALSE)
   }
 
@@ -92,26 +150,23 @@ run_NMF_iter <- function(expr_mat,
   }
 
   # input validation
-  if (!is.matrix(expr_mat) && !inherits(expr_mat, "dgCMatrix")) {
+  if(!is.matrix(expr_mat) && !inherits(expr_mat, "dgCMatrix")){
     stop("expr_mat must be a matrix or dgCMatrix.", call. = FALSE)
   }
 
-  if (!is.numeric(k_used) || length(k_used) != 1 || k_used < 1) {
+  if(!is.numeric(k_used) || length(k_used) != 1 || k_used < 1){
     stop("k_used must be a positive integer.", call. = FALSE)
   }
 
-  if (length(seed_list) < 1) {
+  if(length(seed_list) < 1){
     stop("seed_list must contain at least one seed.", call. = FALSE)
   }
 
   dir.create(nmf_model_dir, recursive = TRUE, showWarnings = FALSE)
 
-  for (seed_ in seed_list) {
+  for(seed_ in seed_list){
 
-    out_fn <- file.path(
-      nmf_model_dir,
-      paste0("nmf-model-iter_k", k_used, "_seed", seed_, ".rds")
-    )
+    out_fn <- file.path(nmf_model_dir,paste0("nmf-model-iter_k", k_used, "_seed", seed_, ".rds"))
 
     nmf_model <- tryCatch(
       {
@@ -134,7 +189,7 @@ run_NMF_iter <- function(expr_mat,
 
     saveRDS(nmf_model, out_fn)
 
-    if (!file.exists(out_fn)) {
+    if(!file.exists(out_fn)){
       stop("NMF model was not written to file: ", out_fn, call. = FALSE)
     }
 
@@ -553,22 +608,28 @@ consensus_nmf_usage <- function(expr_mat,
     stop("expr_mat and consensus_nmf must have the same number of rows.", call. = FALSE)
   }
 
-  ret_h <- RcppML::project(w = consensus_nmf,
-                           data = expr_mat)
+  ret_h <- .rcppml_project(
+    w = consensus_nmf,
+    A = expr_mat
+  )
+
   cnmf_d <- rowSums(ret_h)
   names(cnmf_d) <- colnames(consensus_nmf)
   cnmf_h <- t(ret_h) %*% diag(1 / cnmf_d)
   cnmf_h <- t(cnmf_h)
   rownames(cnmf_h) <- colnames(consensus_nmf)
 
-  error <- RcppML::mse(w = consensus_nmf,
-                       d = cnmf_d,
-                       h = cnmf_h,
-                       data = expr_mat)
+  error <- .rcppml_mse(
+    w = consensus_nmf,
+    d = cnmf_d,
+    h = cnmf_h,
+    A = expr_mat
+  )
 
   outs <- list("cnmf_w"=consensus_nmf,
                "cnmf_d"=cnmf_d,
-               "cnmf_h"=cnmf_h)
+               "cnmf_h"=cnmf_h,
+               "error"=error)
 
   return(outs)
 }

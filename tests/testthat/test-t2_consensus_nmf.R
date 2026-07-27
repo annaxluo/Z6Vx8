@@ -366,7 +366,7 @@ test_that("consensus_nmf_usage returns correct structure", {
   )
 
   expect_type(result, "list")
-  expect_named(result, c("cnmf_w", "cnmf_d", "cnmf_h"))
+  expect_named(result, c("cnmf_w", "cnmf_d", "cnmf_h", "error"))
 
   expect_equal(nrow(result$cnmf_w), nrow(logcounts_mat))
   expect_equal(ncol(result$cnmf_w), ncol(cnmf_w))
