@@ -135,11 +135,11 @@ test_that("map_human_gene_to_mouse_gene_symbol works with Entrez IDs", {
 #' @param n_rows Number of pathways
 #' @param all_significant If TRUE, all pathways have fdr < 0.05
 #' @param seed Random seed for reproducibility
-create_mock_gsea_df <- function(n_rows = 20, all_significant = FALSE, seed = 123) {
+create_mock_gsea_df <- function(n_rows = 20, all_significant = FALSE, seed = 123){
 
   set.seed(seed)
 
-  if (all_significant) {
+  if(all_significant){
     fdr_vals <- runif(n_rows, 0.001, 0.04)
     pval_vals <- fdr_vals * runif(n_rows, 0.5, 0.9)
   } else {

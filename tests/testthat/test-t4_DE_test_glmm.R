@@ -47,7 +47,7 @@ get_valid_sce <- function(n_genes = 100){
 
   # filter cell type
   dat_sub <- sce[,sce[["celltype"]]=="cell_type1"]
-  if (n_genes < nrow(dat_sub)) {
+  if(n_genes < nrow(dat_sub)){
     dat_sub <- dat_sub[1:n_genes, ]
   }
 
@@ -60,7 +60,7 @@ get_valid_sce <- function(n_genes = 100){
 #' Helper function to test output structures.
 #' @param result The output from DE_glmm function
 #' @param test_method The test method used
-check_DE_glmm_output <- function(result, test_method = NULL) {
+check_DE_glmm_output <- function(result, test_method = NULL){
 
   expect_type(result, "list")
 

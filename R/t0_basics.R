@@ -1,5 +1,6 @@
 # utilities
 
+
 #' Compute size factor for a counts matrix
 #' @param counts A Matrix or inheriting from Matrix.
 #' @param round_exprs A logical.
@@ -29,22 +30,13 @@ compute_hvg <- function(expr_mat,
                         fdr_top_cutoff=.5,
                         n_top_genes=3000){
 
-  if(!requireNamespace("Seurat", quietly = TRUE)){
-    stop(
-      "Package 'Seurat' is required for compute_hvg(). ",
-      "Install it with install.packages('Seurat').",
-      call. = FALSE
-    )
-  }
-
   dat <- expr_mat[,used_cells]
 
   # Fit loess regression
-  hvf.info <- Seurat::FindVariableFeatures(
+  hvf.info <- .FindVariableFeatures_vst(
     object = dat,
-    selection.method = "vst",
     loess.span = 0.3,
-    verbose = FALSE
+    clip.max = "auto"
   )
 
   if(is.null(fdr_top_cutoff)){
@@ -75,22 +67,22 @@ compute_hvg <- function(expr_mat,
 #' @returns a numeric vector of z-scores
 compute_z_score <- function(vec){
 
-  ###fit normal with 25% to 75%
+  # fit normal with 25% to 75%
   IQR <- quantile(vec,
                   probs = c(0.25, 0.75),
                   na.rm = TRUE)
   m <- mean(IQR)
   delta <- (IQR[2] - IQR[1]) / (qnorm(0.75) - qnorm(0.25))
 
-  (vec  - m) / delta
+  (vec - m) / delta
 }
-
 
 #' Make mock aggregated data
 #'
 #' @param ncol numeric, number of columns
 #' @param nrow numeric, number of rows
 #' @returns A SingleCellExperiment object
+#'
 #' @export
 make_summed_sce <- function(ncol_=500, nrow_=400){
 
@@ -107,5 +99,85 @@ make_summed_sce <- function(ncol_=500, nrow_=400){
   SummarizedExperiment::colData(summed) <- col_data[, !dup_cols]
 
   return(summed)
+}
+
+#' Replementation of the Seurat's `FindVariableFeatures` to apply Variance
+#' Stabilizing Transformation on a matrix or dgCMatrix object.
+#' @param counts A Matrix or inheriting from Matrix.
+#' @param loess.span A numeric. Loess span parameter for VST
+#' @param clip.max A numeric or "auto". The maximum value allowed after standardization.
+#'
+#' @returns A data.frame, specifying the mean, variance, expected variance
+#' based on the mean-variance trend, and the standardized expected variance for
+#' each gene.
+#'
+#' @keywords internal
+.FindVariableFeatures_vst <- function(object,
+                                      loess.span = 0.3,
+                                      clip.max = "auto"){
+
+  if(!requireNamespace("Matrix", quietly = TRUE)){
+    stop("Package 'Matrix' is required.")
+  }
+
+  n_cells <- ncol(object)
+  n_features <- nrow(object)
+
+  if(clip.max == "auto"){
+    clip.max <- sqrt(n_cells)
+  }
+
+  # sample variance per row
+  row_means <- Matrix::rowMeans(object)
+  row_sumsq <- Matrix::rowSums(object^2)
+  row_vars <- (row_sumsq - n_cells * row_means^2) / (n_cells - 1)
+  row_vars[row_vars < 0] <- 0
+
+  hvf.info <- data.frame(
+    mean = row_means,
+    variance = row_vars,
+    variance.expected = 0,
+    variance.standardized = 0,
+    row.names = rownames(object)
+  )
+
+  not.const <- hvf.info$variance > 0 & hvf.info$mean > 0
+
+  fit <- stats::loess(
+    formula = log10(variance) ~ log10(mean),
+    data = hvf.info[not.const, , drop = FALSE],
+    span = loess.span
+  )
+
+  hvf.info$variance.expected[not.const] <- 10^fit$fitted
+
+  # variance of standardized values after clipping standardized values at clip.max.
+  expected_sd <- sqrt(hvf.info$variance.expected)
+
+  variance.standardized <- numeric(n_features)
+
+  for(i in seq_len(n_features)){
+    if(expected_sd[i] == 0 || is.na(expected_sd[i])){
+      variance.standardized[i] <- 0
+      next
+    }
+
+    row_start <- object@p[1:n_cells] + 1L
+    row_end <- object@p[2:(n_cells + 1L)]
+
+    ## Easier and clear standalone implementation:
+    x <- as.numeric(object[i, ])
+
+    z <- (x - row_means[i]) / expected_sd[i]
+    z[z > clip.max] <- clip.max
+
+    variance.standardized[i] <- stats::var(z)
+  }
+
+  hvf.info$variance.standardized <- variance.standardized
+
+  colnames(hvf.info) <- paste0("vst.", colnames(hvf.info))
+
+  return(hvf.info)
 }
 

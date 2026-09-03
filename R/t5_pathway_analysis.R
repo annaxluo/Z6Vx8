@@ -333,7 +333,7 @@ gsea_dotplot <- function(df,
   }
 
   # handle case where no pathways pass threshold
-  if (nrow(df2) == 0) {
+  if(nrow(df2) == 0){
     message("No pathways pass the threshold (", p_value_str, " < ",
             p_value_threshold, ").")
     return(NULL)

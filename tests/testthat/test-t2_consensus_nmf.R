@@ -25,11 +25,11 @@ test_that("run_NMF_iter runs NMF decomposition for multiple iterations", {
   expect_true(result)
 
   # output files
-  expected_files <- sapply(seed_list, function(s) {
+  expected_files <- sapply(seed_list, function(s){
     file.path(nmf_model_dir, paste0("nmf-model-iter_k", k_used, "_seed", s, ".rds"))
   })
 
-  for (fn in expected_files) {
+  for(fn in expected_files){
     expect_true(file.exists(fn), info = paste("file should exist:", fn))
   }
 
@@ -95,7 +95,7 @@ test_that("mean_nn_distance applies density threshold to filter components", {
     seed_list = seed_list
   )
 
-  # First compute mean distances
+  # compute mean distances
   filter_result <- mean_nn_distance(
     nmf_w_list = nmf_w_list,
     used_k = k_used,
@@ -442,7 +442,7 @@ test_that("filter_cnmf returns correct structure", {
   expect_equal(length(result), 2)
   expect_true(all(c("A", "B") %in% names(result)))
 
-  for(nm in names(result)) {
+  for(nm in names(result)){
     expect_s4_class(result[[nm]], "DFrame")
     expect_true("is.outlier" %in% colnames(result[[nm]]))
     expect_true("FDR" %in% colnames(result[[nm]]))
@@ -456,7 +456,7 @@ test_that("filter_cnmf returns correct structure", {
 test_that("cleanup temporary files", {
 
   files_to_remove <- list.files(nmf_model_dir, pattern = "nmf-model-iter", full.names = TRUE)
-  if (length(files_to_remove) > 0) {
+  if(length(files_to_remove) > 0){
     file.remove(files_to_remove)
   }
   expect_true(TRUE)

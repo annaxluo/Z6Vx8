@@ -198,9 +198,9 @@ DE_pseudobulk <- function(sce,
       params[["DESeq2.test"]] <- "LRT"
 
     if(!"DESeq2.fitType" %in% names(params)){
-      params[["DESeq2.fitType"]] <- if (requireNamespace("glmGamPoi", quietly = TRUE)) {
+      params[["DESeq2.fitType"]] <- if(requireNamespace("glmGamPoi", quietly = TRUE)){
         "glmGamPoi"
-      } else {
+      }else{
         "parametric"
       }
     }
@@ -343,7 +343,7 @@ diagnostic_plots <- function(outs, output_dir){
     out_fn1 <- file.path(output_dir, "plot_MD_samples.pdf")
     pdf(out_fn1, width = 10, height = 6)
     par(mfrow=c(2,ceiling(ncol(pseudobulk_obj)/2)))
-    for (i in seq_len(ncol(pseudobulk_obj))) {
+    for(i in seq_len(ncol(pseudobulk_obj))){
       limma::plotMD(pseudobulk_obj, column=i)
     }
     dev.off()

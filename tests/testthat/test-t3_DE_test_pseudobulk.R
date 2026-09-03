@@ -263,7 +263,7 @@ test_that("all test methods return results with similar structure", {
 
   methods <- c("DESeq2_pseudobulk", "edgeR_pseudobulk", "limma_pseudobulk")
 
-  results <- lapply(methods, function(method) {
+  results <- lapply(methods, function(method){
     DE_pseudobulk(
       sce = current_valid,
       group_colname = "condition",
@@ -278,7 +278,7 @@ test_that("all test methods return results with similar structure", {
 
   # all res_tbl should have common columns
   common_cols <- c("gene_id", "gene_symbol", "log2FoldChange", "pvalue", "fdr")
-  for (method in methods) {
+  for(method in methods){
     expect_true(
       all(common_cols %in% colnames(results[[method]]$res_tbl)),
       info = paste("Method:", method)

@@ -73,11 +73,11 @@
 
   project_formals <- names(formals(RcppML::project))
 
-  if ("A" %in% project_formals) {
+  if("A" %in% project_formals){
     return(RcppML::project(w = w, A = A))
   }
 
-  if ("data" %in% project_formals) {
+  if("data" %in% project_formals){
     return(RcppML::project(w = w, data = A))
   }
 
@@ -132,7 +132,7 @@
 run_NMF_iter <- function(expr_mat,
                          k_used,
                          nmf_model_dir,
-                         seed_list) {
+                         seed_list){
 
   if(!requireNamespace("RcppML", quietly = TRUE)){
     stop("Package 'RcppML' is required.", call. = FALSE)
@@ -143,7 +143,7 @@ run_NMF_iter <- function(expr_mat,
   }
 
   # for CMD check
-  if (!"package:Matrix" %in% search()) {
+  if(!"package:Matrix" %in% search()){
     suppressPackageStartupMessages(
       library(Matrix)
     )
@@ -179,7 +179,7 @@ run_NMF_iter <- function(expr_mat,
           seed = seed_
         )
       },
-      error = function(e) {
+      error = function(e){
         stop(
           sprintf("NMF failed for seed %s: %s", seed_, conditionMessage(e)),
           call. = FALSE

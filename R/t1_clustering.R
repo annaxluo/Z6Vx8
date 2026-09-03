@@ -153,8 +153,7 @@ compute_deScores <- function(membership,
                              expr_mat,
                              min_cluster_size = 50,
                              min_max_de_score = 5,
-                             min_mean_de_score = 1
-){
+                             min_mean_de_score = 1){
   grp_ <- factor(membership)
   nb_clusters <- length(levels(grp_))
   # exclude clusters with few cells
@@ -274,7 +273,7 @@ assign_cluster_celltypes <- function(cL_,
 #' @export
 adj.rand.index <- function(c1, c2){
   n <- length(c1)
-  if ( length(c2) != n ) stop("Clusterings must be the same length.")
+  if( length(c2) != n ) stop("Clusterings must be the same length.")
   t1  <- table(c1)
   t2  <- table(c2)
   t12 <- table(c1,c2)
