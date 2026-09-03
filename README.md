@@ -19,10 +19,10 @@
 ## Table of contents
 
 - [Installation](#installation)
-  - [Install Bioconductor](#install-bioconductor)
-  - [Install core dependencies](#install-core-dependencies)
-  - [Install developer version of RcppML](#install-developer-version-of-rcppml)
-  - [Install optional dependencies for specific functions](#install-optional-dependencies-for-specific-functions)
+  - [Install Bioconductor](#1-install-bioconductor)
+  - [Install core dependencies](#2-install-core-dependencies)
+  - [Install developer version of RcppML](#3-install-developer-version-of-rcppml)
+  - [Install optional dependencies for specific functions](#4-install-optional-dependencies-for-specific-functions)
   - [Install Z6Vx8](#install-z6vx8)
 - [Using the consensus non-negative matrix factorization cNMF functions](#using-the-consensus-non-negative-matrix-factorization-cnmf-functions)
 - [Requirements](#requirements)
